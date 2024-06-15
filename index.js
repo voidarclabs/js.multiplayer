@@ -8,6 +8,9 @@ const mysql = require("mysql2");
 // declare constants
 const port = 3000
 const gamespawn = {x: 1, y: 1}
+const starterinventory = []
+
+var gameinfo = []
 
 // declare mysql server connection
 var con = mysql.createConnection({
@@ -50,13 +53,19 @@ io.on('connection', (socket) =>{
     // request username of client
     socket.emit('getname', (callback) => {
         console.log(callback.name, callback.color)
-        let playerinfo = [callback.name, callback.color, gamespawn]
+        let playerinfo = [callback.name, callback.color, gamespawn, starterinventory]
         updategame('playerjoin', playerinfo)
     })
 })
 
 function updategame(updatetype, info) {
+    let name = info[0]
+    let color = info[1]
+    let position = info[2]
+    let inventory = info[3]
     if (updatetype == 'playerjoin') {
+        gameinfo[name] = [color, position, inventory]
+        console.log(gameinfo)
         io.emit('gameupdate', ['join', info])
     }
 }
