@@ -1,0 +1,23 @@
+body {
+    min-height: 100vh;
+    max-height: 100vh;
+    padding: 0;
+    margin: 0;
+    display: grid;
+}
+
+.popup {
+    position: absolute;
+}
+
+#gamecontainer {
+    justify-self: center;
+    position: relative;
+    top: 0;
+    grid-template-columns: repeat(30, 1fr);
+    grid-template-rows: repeat(30, 1fr);
+    display: grid;
+    height: calc(100vh - 100px);
+    width: calc(100vh - 100px);
+    margin: 50px;
+}

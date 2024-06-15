@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="index.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/socket.io/socket.io.js"></script>
+    <title>Multiplayer Game</title>
+</head>
+<body>
+    <div class="popup" id="logincontainer">
+        <input type="text" id="namecontainer">
+        <input type="text" id="colorcontainer">
+        <button type="submit"id='submitname'>submit</button>
+    </div>
+    <div id="gamecontainer">
+        
+    </div>
+    <script>
+        const socket = io()
+        const isAlphanumeric = str => /^[0-9A-Z]+$/i.test(str);
+
+        function isValidColor(color) {
+            // Create a temporary DOM element
+            const tempElement = document.createElement('div');
+            // Set the element's color property
+            tempElement.style.color = color;
+            // Check if the color was applied
+            return tempElement.style.color !== '';
+        }
+
+        socket.on(`getname`, (callback) => {
+            let event = document.getElementById('submitname').addEventListener('click', handlebuttonpress)
+
+            function handlebuttonpress(event) {
+                let namechosen = document.getElementById('namecontainer').value
+                let colorchosen = document.getElementById('colorcontainer').value
+
+                if (!isAlphanumeric(namechosen)) {
+                    console.log('empty username')
+                } else {
+                    if (!isAlphanumeric(colorchosen) || !isValidColor(colorchosen)) {
+                        console.log('empty color')
+                    } else {
+                        callback({name: namechosen, color: colorchosen})
+                    }
+                    
+                }
+            }
+            
+        })
+
+        socket.on('gameupdate', (data) => {
+            let type = data[0]
+            let info = data[1]
+            if (type == 'join') {
+                let name = info[0]
+                let color = info[1]
+                let position = info[2]
+                addplayer(name, color, position)
+            }
+        })
+        
+        
+        function addplayer(name, color, position) {
+            let player = `<div class="player" id='player-${name}'>
+                            <div class="playercolor"></div>
+                            <div class="playername">${name}</div>
+                        </div>`
+                        
+            document.getElementById('gamecontainer').innerHTML += player
+            let playeringame = document.getElementById(`player-${name}`)
+            playeringame.style.backgroundColor = color
+            playeringame.style.gridRow = position.y
+            playeringame.style.gridColumn = position.x
+        }
+    </script>
+</body>
+</html>
