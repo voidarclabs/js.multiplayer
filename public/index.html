@@ -50,20 +50,20 @@
                     if (!isAlphanumeric(colorchosen) || !isValidColor(colorchosen)) {
                         console.log('empty color')
                     } else {
-                        socket.emit('requestpass', [namechosen, passchosen], (callback2) => {
-                            if (callback2 = 'incorrect') {
+                        let userandpass = [namechosen, passchosen]
+                        socket.emit('requestpass', userandpass, (callback) => {
+                            console.log(callback.status)
+                            if (callback.status == 'incorrect' ) {
                                 console.log('incorrect password')
-                            }
-                            if (callback2 = 'newuser') {
-                                handlesucess()
-                            }
-                            if (callback2 = 'olduser') {
-
+                            } else {
+                                handlesuccess()
                             }
                         })
+                        
+                        }
 
                         function handlesuccess() {
-                            callback({name: namechosen, color: colorchosen})
+                            callback({name: namechosen, color: colorchosen, pass: passchosen})
 
                             gamer = `player-${namechosen}`
 
@@ -81,7 +81,7 @@
                 }
             }
             
-        })
+        )
 
         socket.on('gameupdate', (data) => {
             let type = data[0]

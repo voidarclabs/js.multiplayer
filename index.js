@@ -12,9 +12,9 @@ const gamespawn = {x: 1, y: 1}
 const starterinventory = []
 
 var userinfo = {}
-var gameinfo = {}
+var gameinfo = {red: ['red', 'red', {x: 1, y: 1}, []]}
 var playersocket = {}
-var playerpass = {}
+var playerpass = {red: 'balls'}
 
 // declare mysql server connection
 var con = mysql.createConnection({
@@ -29,8 +29,28 @@ var con = mysql.createConnection({
 con.connect(function(err) {
 	if (err) throw err
     console.log(chalk.blue("db connected"))
+
+    
+
+    
 });
 
+let cum = setTimeout(() => {
+            savegame()
+        }, 1000);
+
+function savegame() {
+        for (let elem in gameinfo) {
+            let element = gameinfo[elem]
+            let stringelem = element.split(',')
+            console.log(stringelem)
+            con.query(`INSERT INTO gameinfo VALUES (${element[0]}, ${element[1]}, ${element[2]}, ${element[3]})`, function (err, result) {
+                if (err) throw err;
+                console.log("Result: " + result);
+            });
+        }
+        
+    }
 // make server serve index.html when requested
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -61,6 +81,7 @@ io.on('connection', (socket) =>{
         let deleted = playersocket[socket.id]
         console.log(chalk.red('player left'), chalk.yellowBright(deleted))
         userinfo[deleted] = gameinfo[deleted]
+        delete gameinfo[deleted]
         delete playersocket[socket]
         updategame('allinfo', gameinfo, io)
     })
@@ -77,25 +98,36 @@ io.on('connection', (socket) =>{
         }
     })
 
+    socket.on('requestpass', (data, callback) => {
+        let name = data[0]
+        let pass = data[1]
+        if (name in playerpass) {
+            if (pass !== playerpass[name]) {
+                callback({status: 'incorrect'})
+            } else {
+                callback({status: 'correct'})
+            }
+        } else {
+            callback({status: 'newplayer'})
+        }
+    })
+
     // request username of client
     socket.emit('getname', (callback) => {
-        socket.on('requestpass', (nameandpass, callback2) => {
-            if (!nameandpass[0] in playerpass) {
-                playerpass[nameandpass[0]] = nameandpass[1]
-                handlesuccess(callback.name, callback.color, gamespawn, starterinventory)
-            } else {
-                if (nameandpass[1] != playerpass[nameandpass[0]]) {
-                    callback2('incorrect')
-                }
-                else {
-                    let currentuserinfo = userinfo[nameandpass[0]]
-                }
-            }
-        })
 
-        function handlesuccess(name, color, position, inventory) {
+        if (callback.name in userinfo) {
+            let info = userinfo[callback.name]
+            handlesuccess(info[0], info[1], info[2], info[3])
+        } else {
+            handlesuccess(callback.name, callback.color, gamespawn, starterinventory, callback.password)
+        }
+
+        function handlesuccess(id, color, pos, inventory, password) {
             console.log(chalk.yellowBright(`new player`), chalk.green(`${callback.name}`))
-            let playerinfo = [name, color, position, inventory]
+            let playerinfo = [id, color, pos, inventory]
+            if (password) {
+                playerpass[id] = password
+            }
             playersocket[socket.id] = callback.name
 
             updategame('playerjoin', playerinfo)
