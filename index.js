@@ -11,10 +11,10 @@ const port = 3000
 const gamespawn = {x: 1, y: 1}
 const starterinventory = []
 
-var userinfo = {}
-var gameinfo = {red: ['red', 'red', {x: 1, y: 1}, []]}
+var userinfo = {red: ['red', 'red', {x: 1, y: 1}, []]}
+var gameinfo = {}
 var playersocket = {}
-var playerpass = {red: 'balls'}
+var playerpass = {red: 'password'}
 
 // declare mysql server connection
 var con = mysql.createConnection({
@@ -30,27 +30,7 @@ con.connect(function(err) {
 	if (err) throw err
     console.log(chalk.blue("db connected"))
 
-    
-
-    
 });
-
-let cum = setTimeout(() => {
-            savegame()
-        }, 1000);
-
-function savegame() {
-        for (let elem in gameinfo) {
-            let element = gameinfo[elem]
-            let stringelem = element.split(',')
-            console.log(stringelem)
-            con.query(`INSERT INTO gameinfo VALUES (${element[0]}, ${element[1]}, ${element[2]}, ${element[3]})`, function (err, result) {
-                if (err) throw err;
-                console.log("Result: " + result);
-            });
-        }
-        
-    }
 // make server serve index.html when requested
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

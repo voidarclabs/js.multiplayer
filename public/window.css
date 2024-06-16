@@ -1,0 +1,174 @@
+.fa-solid {
+  justify-self: center;
+  align-self: center;
+  width: 100%;
+  padding-left: 25%;
+}
+#topnav {
+  display: inline-block;
+  font-size: 15px;
+}
+#topnavexit {
+  float: left;
+  margin-top: 3px;
+  margin-left: 7px;
+  border-radius: 50%;
+  height: 15px;
+  width: 15px;
+  background-color: red;
+  font-size: 15px;
+  display: grid;
+}
+#topnavminimise {
+  float: left;
+  margin-top: 3px;
+  margin-left: 3px;
+  border-radius: 50%;
+  height: 15px;
+  width: 15px;
+  background-color: rgb(255, 208, 0);
+  font-size: 15px;
+  display: grid;
+}
+.unmin {
+  float: left;
+  margin-top: 3px;
+  margin-left: 3px;
+  border-radius: 50%;
+  height: 15px;
+  width: 15px;
+  background-color: rgb(255, 208, 0);
+  font-size: 15px;
+  position: absolute;
+  display: none;
+}
+.unminicon {
+  display: none;
+}
+#topnavmaximise {
+  float: left;
+  margin-top: 3px;
+  margin-left: 3px;
+  border-radius: 50%;
+  height: 15px;
+  width: 15px;
+  background-color: rgb(21, 255, 0);
+  font-size: 10px;
+  display: grid;
+}
+  .draggableDiv {
+      min-height: 300px;
+      min-width: 300px;
+      background: rgba(85, 85, 85, 0.8);
+      backdrop-filter: blur(10px);
+      position: absolute;
+      overflow: hidden;
+      height: 450px;
+      width: 625px;
+      top: 20px;
+      left: 20px;
+      border-radius: 10px;
+      box-shadow: 5px 5px 5px #363636;
+      transition: opacity 0.5s;
+  }
+  .resizer {
+      width: 10px;
+      height: 10px;
+      background-color: #fff;
+      position: absolute;
+  }
+  .bottom-right-resize {
+      bottom: 0;
+      right: 0;
+      cursor: se-resize;
+  }
+  .topnav {
+      height: 21px;
+      width: 100%;
+  }
+  .appcontent {
+      height: calc(100% - 36px);
+      width: 100%;
+      position: absolute;
+  }
+  .appname {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 25px;
+    height: calc(100% - 25px);
+    width: 100%;
+  }
+  .appcontent {
+    transition: opacity 0.2s ease-in-out, height 0.2s ease-in-out, padding-top 0.2s ease-in-out; /* Adjust the duration and easing as needed */
+    opacity: 1;
+  }
+
+  .appframe.hidden {
+    opacity: 0;
+    padding-top: 25%;
+    height: 0; /* Collapse the iframe's height when hidden */
+    overflow: hidden; /* Hide any content that exceeds the collapsed height */
+  }
+  .appicon {
+    height: 70px;
+    width: 70px;
+  }
+
+  .appicon-desktop .appicon{
+    height: 60px;
+    width: 60px;
+  }
+
+  #appcontainer {
+    top: 0;
+    padding: 5px;
+  }
+
+  .app-desktop {
+    display: grid;
+    margin-bottom: 10px;
+    width: 60px;
+    background-color: rgba(204, 204, 204, 0.514);
+    backdrop-filter: blur(15px);
+    border-radius: 10px;
+  }
+
+  .appname-desktop {
+    text-align: center;
+  }
+
+  .appname-desktop::first-letter {
+    text-transform:capitalize;
+  }
+  
+  #contextMenu {
+    position: absolute;
+    display: none;
+    background-color: rgba(160, 160, 160, 0.541);
+    backdrop-filter: blur(15px);
+    border-radius: 10px;
+    z-index: 10;
+  }
+
+  #contextmenuoption {
+    border-color: #00000000;
+    border-bottom: #363636;
+    border-style: solid;
+    width: 170px;
+    padding-left: 5px;
+    border-width: 1px;
+    padding-top: 2.5px;
+    padding-bottom: 2.5px;
+  }
+
+  #contextmenuoption:last-child {
+    border-bottom: #36363600;
+  }
+
+  .resizer-desktop {
+    height: 0;
+    width: 0;
+    position: absolute;
+  }

@@ -6,18 +6,14 @@
     <link rel="stylesheet" href="index.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/socket.io/socket.io.js"></script>
+    <script src="windowmanager.js"></script>
+    <link rel="stylesheet" href="window.css">
+    <script src="https://kit.fontawesome.com/ea3f46344d.js" crossorigin="anonymous"></script>
     <title>Multiplayer Game</title>
 </head>
 <body>
-    <div class="popup" id="logincontainer">
-        <input type="text" id="namecontainer">
-        <input type="text" id="passcontainer">
-        <input type="text" id="colorcontainer">
-        <button type="submit"id='submitname'>submit</button>
-    </div>
-    <div id="gamecontainer">
-        
-    </div>
+    <div id="gamecontainer"></div>
+    <div id="windowcontainer"></div>
     <script>
         const socket = io()
         const isAlphanumeric = str => /^[0-9A-Z]+$/i.test(str);
@@ -37,9 +33,15 @@
         }
 
         socket.on(`getname`, (callback) => {
-            let event = document.getElementById('submitname').addEventListener('click', handlebuttonpress)
+            makenewwindow('login', 'login');
+            // You need to pass the callback to the handlebuttonpress function
+            document.getElementById('submitname').addEventListener('click', () => handlebuttonpress(callback));
+        
+            }
+            
+        )
 
-            function handlebuttonpress(event) {
+        function handlebuttonpress(event) {
                 namechosen = document.getElementById('namecontainer').value
                 colorchosen = document.getElementById('colorcontainer').value
                 passchosen = document.getElementById('passcontainer').value
@@ -56,13 +58,13 @@
                             if (callback.status == 'incorrect' ) {
                                 console.log('incorrect password')
                             } else {
-                                handlesuccess()
+                                handlesuccess(event)
                             }
                         })
                         
                         }
 
-                        function handlesuccess() {
+                        function handlesuccess(callback) {
                             callback({name: namechosen, color: colorchosen, pass: passchosen})
 
                             gamer = `player-${namechosen}`
@@ -72,6 +74,7 @@
                             // Initialize movement system
                             setTimeout(() => {
                                 setupMovementSystem();
+                                deletewindow('0')
                             }, 50);
                         }
                         
@@ -79,9 +82,6 @@
                     }
                     
                 }
-            }
-            
-        )
 
         socket.on('gameupdate', (data) => {
             let type = data[0]
