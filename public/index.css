@@ -5,6 +5,7 @@ body {
     margin: 0;
     display: grid;
     font-family: 'Varela Round';
+    background-color: green;
 }
 
 .popup {
@@ -22,12 +23,12 @@ body {
     height: calc(100vh - 100px);
     width: calc(100vh - 100px);
     margin: 50px;
+    
 }
 
 #gamecontainer > div {
     min-width: 0; /* Minimum width of each grid square */
     min-height: 0; /* Minimum height of each grid square */
     overflow: visible; /* Allow content to overflow outside */
-    border: 1px solid #ccc; /* Optional: Add borders for visual clarity */
     box-sizing: border-box; /* Ensures border is included in dimensions */
 }

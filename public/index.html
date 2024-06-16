@@ -42,9 +42,10 @@
         )
 
         function handlebuttonpress(event) {
-                namechosen = document.getElementById('namecontainer').value
-                colorchosen = document.getElementById('colorcontainer').value
-                passchosen = document.getElementById('passcontainer').value
+                // namechosen = document.getElementById('namecontainer').value
+                // colorchosen = document.getElementById('colorcontainer').value
+                // passchosen = document.getElementById('passcontainer').value
+                
 
                 if (!isAlphanumeric(namechosen) || document.getElementById(`player-${namechosen}`)) {
                     console.log('empty username')
@@ -58,11 +59,15 @@
                             if (callback.status == 'incorrect' ) {
                                 console.log('incorrect password')
                             } else {
-                                handlesuccess(event)
+                                // handlesuccess(event)
                             }
                         })
                         
-                        }
+                    }
+                namechosen = 'test'
+                colorchosen = 'purple'
+                passchosen = 'pass'
+                handlesuccess(event)
 
                         function handlesuccess(callback) {
                             callback({name: namechosen, color: colorchosen, pass: passchosen})

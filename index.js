@@ -135,6 +135,7 @@ function updategame(updatetype, info, socket) {
     if (updatetype = 'position') {
         io.emit('gameupdate', ['pos', info])
     }
+    
 }
 
 function savegame(player) {
