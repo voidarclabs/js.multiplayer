@@ -210,6 +210,10 @@
             let margin = overflow - gridwidth
             playernameingame.style.marginLeft = -margin / 2 + 'px'
         }
+
+        function savegame() {
+            socket.emit('clientupdate', ['savegame', undefined])
+        }
     </script>
 </body>
 </html>

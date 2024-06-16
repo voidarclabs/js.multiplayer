@@ -5,32 +5,25 @@ const path = require('path');
 const socketio = require('socket.io');
 const mysql = require("mysql2");
 const chalk=require("chalk"); 
+const fs = require('fs');
+
 
 // declare constants
 const port = 3000
 const gamespawn = {x: 1, y: 1}
 const starterinventory = []
 
-var userinfo = {red: ['red', 'red', {x: 1, y: 1}, []]}
+var userinfo
 var gameinfo = {}
 var playersocket = {}
-var playerpass = {red: 'password'}
+var playerpass
 
-// declare mysql server connection
-var con = mysql.createConnection({
-    host: "localhost",
-    port: "3306",
-    user: "root",
-    password: "toor",
-    database: "db"
-});
+function init() {
+    userinfo = require('./gameinfo/userinfo.json')
+    playerpass = require('./gameinfo/playerpass.json')
+}
 
-// attempt to connect to database
-con.connect(function(err) {
-	if (err) throw err
-    console.log(chalk.blue("db connected"))
 
-});
 // make server serve index.html when requested
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -50,6 +43,8 @@ const server = app.listen(port, () => {
 // declare websocket server
 const io = socketio(server)
 
+init()
+
 // listen for incoming connections
 io.on('connection', (socket) =>{
 
@@ -59,8 +54,8 @@ io.on('connection', (socket) =>{
 
     socket.on('disconnect', () => {
         let deleted = playersocket[socket.id]
+        savegame(playersocket[socket.id])
         console.log(chalk.red('player left'), chalk.yellowBright(deleted))
-        userinfo[deleted] = gameinfo[deleted]
         delete gameinfo[deleted]
         delete playersocket[socket]
         updategame('allinfo', gameinfo, io)
@@ -76,6 +71,9 @@ io.on('connection', (socket) =>{
             let clientinfo = [client, newinfo]
             updategame('position', clientinfo)
         }
+        if (type == 'savegame') {
+            savegame(playersocket[socket.id])
+        }
     })
 
     socket.on('requestpass', (data, callback) => {
@@ -89,6 +87,9 @@ io.on('connection', (socket) =>{
             }
         } else {
             callback({status: 'newplayer'})
+            playerpass[name] = pass
+            console.log(pass)
+            savepasswordtofile()
         }
     })
 
@@ -105,9 +106,6 @@ io.on('connection', (socket) =>{
         function handlesuccess(id, color, pos, inventory, password) {
             console.log(chalk.yellowBright(`new player`), chalk.green(`${callback.name}`))
             let playerinfo = [id, color, pos, inventory]
-            if (password) {
-                playerpass[id] = password
-            }
             playersocket[socket.id] = callback.name
 
             updategame('playerjoin', playerinfo)
@@ -137,4 +135,23 @@ function updategame(updatetype, info, socket) {
     if (updatetype = 'position') {
         io.emit('gameupdate', ['pos', info])
     }
+}
+
+function savegame(player) {
+    userinfo[player] = gameinfo[player]
+    savegametofile()
+}
+
+function savegametofile() {
+    let jsonuserinfo = JSON.stringify(userinfo)
+    fs.writeFileSync('./gameinfo/userinfo.json', jsonuserinfo, (err) => {
+        if (err) throw err;
+    })
+}
+
+function savepasswordtofile() {
+    let jsonpassinfo = JSON.stringify(playerpass)
+    fs.writeFileSync('./gameinfo/playerpass.json', jsonpassinfo, (err) => {
+        if (err) throw err;
+    })
 }
