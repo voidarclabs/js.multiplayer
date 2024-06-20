@@ -17,10 +17,13 @@ var userinfo
 var gameinfo = {}
 var playersocket = {}
 var playerpass
+var worldinfo
 
 function init() {
     userinfo = require('./gameinfo/userinfo.json')
     playerpass = require('./gameinfo/playerpass.json')
+    worldinfo = require('./gameinfo/worldinfo.json')
+    console.log(worldinfo)
 }
 
 
