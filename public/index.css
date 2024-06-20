@@ -32,3 +32,31 @@ body {
     overflow: visible; /* Allow content to overflow outside */
     box-sizing: border-box; /* Ensures border is included in dimensions */
 }
+
+.stone {
+    background-color: gray;
+}
+
+.wood {
+    background-color: brown;
+}
+
+.planks {
+    background-color: rgb(255, 255, 150);
+}
+
+.damage0 {
+    filter: brightness(1);
+}
+
+.damage1 {
+    filter: brightness(0.8);
+}
+
+.damage2 {
+    filter: brightness(0.6);
+}
+
+.damage3 {
+    filter: brightness(0.2);
+}

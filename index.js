@@ -23,7 +23,6 @@ function init() {
     userinfo = require('./gameinfo/userinfo.json')
     playerpass = require('./gameinfo/playerpass.json')
     worldinfo = require('./gameinfo/worldinfo.json')
-    console.log(worldinfo)
 }
 
 
@@ -128,6 +127,7 @@ function updategame(updatetype, info, socket) {
     }
     if (updatetype == 'allinfo') {
         socket.emit('gameupdate', ['all', undefined])
+        updategame('worldfull', undefined)
         for (var key in gameinfo) {
             if (gameinfo.hasOwnProperty(key)) {
                 var infoArray = gameinfo[key];
@@ -135,10 +135,15 @@ function updategame(updatetype, info, socket) {
             }
         }
     }
-    if (updatetype = 'position') {
+    if (updatetype == 'position') {
         io.emit('gameupdate', ['pos', info])
     }
-    
+    if (updatetype == 'worldfull') {
+        io.emit('gameupdate', ['worldall', worldinfo])
+    }
+    if (updatetype == 'world') {
+        io.emit('gameupdate', ['worldupdate', info])
+    }
 }
 
 function savegame(player) {

@@ -121,6 +121,14 @@
                 } else {}
                 
             }
+            if (type == 'worldall') {
+                for (let elem in info) {
+                    for (let block in info[elem]) {
+                        let pos = info[elem][block]
+                        addblock(elem, pos)
+                    }
+                }
+            }
         })
         
         function setupMovementSystem() {
@@ -178,21 +186,40 @@
 
             // Movement functions
             function moveForward() {
-                game.style.gridRow --
+                let checkblock = document.getElementById(`${game.style.gridColumn}:${game.style.gridRow - 1}`)
+                if (!checkblock) {
+                    game.style.gridRow --
+                } else {
+                    let damagelevel = checkblock.classList[1].split('e')[1] - 2
+                    console.log(damagelevel)
+                }
+                
             }
 
             function moveLeft() {
-                game.style.gridColumn --
+                let checkblock = document.getElementById(`${game.style.gridColumn- 1}:${game.style.gridRow}`)
+                if (!checkblock) {
+                    game.style.gridColumn --
+                }
+                
             }
 
             function moveBackward() {
-                game.style.gridRow ++
-                if (game.style.gridRow > 30) {game.style.gridRow = 30}
+                let checkblock = document.getElementById(`${game.style.gridColumn}:${Number(game.style.gridRow) + 1}`)
+                if (!checkblock) {
+                    game.style.gridRow ++
+                    if (game.style.gridRow > 30) {game.style.gridRow = 30}
+                }
+                
             }
 
             function moveRight() {
-                game.style.gridColumn ++
-                if (game.style.gridColumn > 30) {game.style.gridColumn = 30}
+                let checkblock = document.getElementById(`${Number(game.style.gridColumn) + 1}:${game.style.gridRow}`)
+                if (!checkblock) {
+                    game.style.gridColumn ++
+                    if (game.style.gridColumn > 30) {game.style.gridColumn = 30}
+                }
+                
             }
 }
             
@@ -214,6 +241,27 @@
             let gridwidth = document.getElementById('gamecontainer').clientWidth / 30
             let margin = overflow - gridwidth
             playernameingame.style.marginLeft = -margin / 2 + 'px'
+        }
+
+        function addblock(type, pos) {
+            let block = `<div class="${type} damage0" id="${pos.x}:${pos.y}"></div>`
+
+            let existingelement = document.getElementById(`${pos.x}:${pos.y}`)
+
+            if (existingelement) {
+                existingelement.remove()
+                addblocktogame(block, pos)
+            } else {
+                addblocktogame(block, pos)
+            }
+
+            function addblocktogame(block, pos) {
+                document.getElementById('gamecontainer').innerHTML += block
+
+                let blockingame = document.getElementById(`${pos.x}:${pos.y}`).style
+                blockingame.gridRow = pos.y
+                blockingame.gridColumn = pos.x
+            }
         }
 
         function savegame() {
