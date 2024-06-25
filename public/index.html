@@ -129,6 +129,11 @@
                     }
                 }
             }
+            if (type == 'blockdamage') {
+                let block = document.getElementById(info[0])
+                block.classList.remove(block.classList[1])
+                block.classList.add(info[1])
+            }
         })
         
         function setupMovementSystem() {
@@ -158,14 +163,14 @@
                     socket.emit('clientupdate', ['position', currentPos]);
 
                     // Start repeating the function every 100ms
-                    movementFunctions[key].intervalId = setInterval(() => {
-                        movementFunctions[key].func();
-                        const currentPos = {
-                            x: game.style.getPropertyValue('grid-column-start'),
-                            y: game.style.getPropertyValue('grid-row-start')
-                        };
-                        socket.emit('clientupdate', ['position', currentPos]);
-                    }, 100);
+                    // movementFunctions[key].intervalId = setInterval(() => {
+                    //     movementFunctions[key].func();
+                    //     const currentPos = {
+                    //         x: game.style.getPropertyValue('grid-column-start'),
+                    //         y: game.style.getPropertyValue('grid-row-start')
+                    //     };
+                    //     socket.emit('clientupdate', ['position', currentPos]);
+                    // }, 100);
                 }
             }
 
@@ -190,8 +195,7 @@
                 if (!checkblock) {
                     game.style.gridRow --
                 } else {
-                    let damagelevel = checkblock.classList[1].split('e')[1] - 2
-                    console.log(damagelevel)
+                    damageblock(checkblock)
                 }
                 
             }
@@ -200,6 +204,8 @@
                 let checkblock = document.getElementById(`${game.style.gridColumn- 1}:${game.style.gridRow}`)
                 if (!checkblock) {
                     game.style.gridColumn --
+                } else {
+                    damageblock(checkblock)
                 }
                 
             }
@@ -209,6 +215,8 @@
                 if (!checkblock) {
                     game.style.gridRow ++
                     if (game.style.gridRow > 30) {game.style.gridRow = 30}
+                } else {
+                    damageblock(checkblock)
                 }
                 
             }
@@ -218,11 +226,50 @@
                 if (!checkblock) {
                     game.style.gridColumn ++
                     if (game.style.gridColumn > 30) {game.style.gridColumn = 30}
+                } else {
+                    damageblock(checkblock)
                 }
                 
             }
 }
-            
+     
+function damageblock(block) {
+    // Get the current damage level from the class list
+    let damagelevel = parseInt(block.classList[1].split('e')[1]);
+
+    // Increment the damage level
+    damagelevel++;
+
+    // Ensure the damage level does not exceed the maximum allowed value
+    if (damagelevel > 4) {
+        damagelevel = 4;
+    }
+
+    // Remove the old damage class
+    block.classList.remove(`damage${damagelevel - 1}`);
+    
+    // Add the new damage class
+    block.classList.add(`damage${damagelevel}`);
+}
+
+function repairdamagedblocks(block) {
+    // Get the current damage level from the class list
+    let damagelevel = parseInt(block.classList[1].split('e')[1]);
+
+    // Decrement the damage level
+    damagelevel--;
+
+    // Ensure the damage level does not go below the minimum allowed value
+    if (damagelevel < 0) {
+        damagelevel = 0;
+    }
+
+    // Remove the old damage class
+    block.classList.remove(`damage${damagelevel + 1}`);
+
+    // Add the new damage class
+    block.classList.add(`damage${damagelevel}`);
+}
 
         function addplayer(name, color, position) {
             let player = `<div class="player" id='player-${name}'>
