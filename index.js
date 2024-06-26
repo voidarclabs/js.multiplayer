@@ -76,6 +76,26 @@ io.on('connection', (socket) =>{
         if (type == 'savegame') {
             savegame(playersocket[socket.id])
         }
+        if (type == 'blockdamage') {
+            let blockmeta = info[0]
+            let blocktype = blockmeta[1]
+
+            let blockpos = {}
+            blockpos['x'] = blockmeta[0].split(':')[0]
+            blockpos['y'] = blockmeta[0].split(':')[1]
+
+            let blockdamgelevel = info[1]
+
+            for (let block in worldinfo[blocktype]) {
+                let blockinfo = worldinfo[blocktype][block]
+                if (blockinfo['x'] == blockpos['x']) {
+                    if (blockinfo['y'] == blockpos['y']) {
+                        blockinfo['d'] = blockdamgelevel
+                        updategame('blockdamage', [blockmeta, blockinfo['d']])
+                    }
+                }
+            }
+        }
     })
 
     socket.on('requestpass', (data, callback) => {
@@ -105,7 +125,7 @@ io.on('connection', (socket) =>{
             handlesuccess(callback.name, callback.color, gamespawn, starterinventory, callback.password)
         }
 
-        function handlesuccess(id, color, pos, inventory, password) {
+        function handlesuccess(id, color, pos, inventory) {
             console.log(chalk.yellowBright(`new player`), chalk.green(`${callback.name}`))
             let playerinfo = [id, color, pos, inventory]
             playersocket[socket.id] = callback.name
@@ -144,11 +164,15 @@ function updategame(updatetype, info, socket) {
     if (updatetype == 'world') {
         io.emit('gameupdate', ['worldupdate', info])
     }
+    if (updatetype == 'blockdamage') {
+
+    }
 }
 
 function savegame(player) {
     userinfo[player] = gameinfo[player]
     savegametofile()
+    saveworldtofile()
 }
 
 function savegametofile() {
@@ -161,6 +185,13 @@ function savegametofile() {
 function savepasswordtofile() {
     let jsonpassinfo = JSON.stringify(playerpass)
     fs.writeFileSync('./gameinfo/playerpass.json', jsonpassinfo, (err) => {
+        if (err) throw err;
+    })
+}
+
+function saveworldtofile() {
+    let worldpassinfo = JSON.stringify(worldinfo)
+    fs.writeFileSync('./gameinfo/worldinfo.json', worldpassinfo, (err) => {
         if (err) throw err;
     })
 }

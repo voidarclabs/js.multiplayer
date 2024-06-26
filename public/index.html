@@ -250,6 +250,10 @@ function damageblock(block) {
     
     // Add the new damage class
     block.classList.add(`damage${damagelevel}`);
+
+    let blockid = block.id
+    let blocktype = block.classList[0]
+    socket.emit('clientupdate', ['blockdamage', [[blockid, blocktype], damagelevel]])
 }
 
 function repairdamagedblocks(block) {
@@ -291,7 +295,7 @@ function repairdamagedblocks(block) {
         }
 
         function addblock(type, pos) {
-            let block = `<div class="${type} damage0" id="${pos.x}:${pos.y}"></div>`
+            let block = `<div class="${type} damage${pos.d}" id="${pos.x}:${pos.y}"></div>`
 
             let existingelement = document.getElementById(`${pos.x}:${pos.y}`)
 
