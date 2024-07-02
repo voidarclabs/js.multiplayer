@@ -242,7 +242,7 @@ function damageblock(block) {
 
     // Ensure the damage level does not exceed the maximum allowed value
     if (damagelevel > 4) {
-        damagelevel = 4;
+        socket.emit('clientupdate', ['blockbroken', [blockid, blocktype, namechosen]])
     }
 
     // Remove the old damage class

@@ -96,7 +96,21 @@ io.on('connection', (socket) =>{
                 }
             }
         }
+        if (type == 'blockbroken') {
+            let blocktype = info[1]
+            let player = info[2]
+            
+            let blockpos = {}
+            blockpos['x'] = info[0].split(':')[0]
+            blockpos['y'] = info[0].split(':')[1]
+
+            let blockindex = findBlockIndex(blocktype, blockpos['x'], blockpos['y'])
+            delete worldinfo[blockindex]
+            updategame('worldfull', undefined)
+        }
     })
+
+
 
     socket.on('requestpass', (data, callback) => {
         let name = data[0]
@@ -135,6 +149,23 @@ io.on('connection', (socket) =>{
     })
 })
 
+function findBlockIndex(blockType, targetX, targetY) {
+    if (!worldinfo[blockType]) {
+        return -1; // Block type does not exist
+    }
+    
+    const blockArray = worldinfo[blockType];
+    
+    for (let i = 0; i < blockArray.length; i++) {
+        if (blockArray[i].x === targetX && blockArray[i].y === targetY) {
+            return i;
+        }
+    }
+    // If no match is found, return -1
+    return -1;
+}
+
+
 function updategame(updatetype, info, socket) {
     
     if (updatetype == 'playerjoin') {
@@ -165,7 +196,9 @@ function updategame(updatetype, info, socket) {
         io.emit('gameupdate', ['worldupdate', info])
     }
     if (updatetype == 'blockdamage') {
-
+        let coords = info[0][0]
+        let damagelevel = `damage${info[1]}`
+        io.emit('gameupdate', ['blockdamage', [coords, damagelevel]])
     }
 }
 
