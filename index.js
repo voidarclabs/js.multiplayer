@@ -105,8 +105,9 @@ io.on('connection', (socket) =>{
             blockpos['y'] = info[0].split(':')[1]
 
             let blockindex = findBlockIndex(blocktype, blockpos['x'], blockpos['y'])
-            delete worldinfo[blockindex]
-            updategame('worldfull', undefined)
+            console.log(blockindex)
+            delete worldinfo[blocktype][blockindex]
+            updategame('blockbroken', info[0])
         }
     })
 
@@ -155,14 +156,20 @@ function findBlockIndex(blockType, targetX, targetY) {
     }
     
     const blockArray = worldinfo[blockType];
+    i = 0
     
-    for (let i = 0; i < blockArray.length; i++) {
-        if (blockArray[i].x === targetX && blockArray[i].y === targetY) {
-            return i;
+    for (let elem in blockArray) {
+        i++
+        if (elem['x'] == targetX) {
+            if (elem['y'] == targetY) {
+                
+            } else {
+                return -1
+            }
+        } else {
+            return -1
         }
     }
-    // If no match is found, return -1
-    return -1;
 }
 
 
@@ -199,6 +206,10 @@ function updategame(updatetype, info, socket) {
         let coords = info[0][0]
         let damagelevel = `damage${info[1]}`
         io.emit('gameupdate', ['blockdamage', [coords, damagelevel]])
+    }
+    if (updatetype == 'blockbroken') {
+        console.log(worldinfo)
+        io.emit('gmaeupdate', ['blockbroken', info])
     }
 }
 

@@ -234,6 +234,9 @@
 }
      
 function damageblock(block) {
+    
+    let blockid = block.id
+    let blocktype = block.classList[0]
     // Get the current damage level from the class list
     let damagelevel = parseInt(block.classList[1].split('e')[1]);
 
@@ -250,9 +253,7 @@ function damageblock(block) {
     
     // Add the new damage class
     block.classList.add(`damage${damagelevel}`);
-
-    let blockid = block.id
-    let blocktype = block.classList[0]
+    
     socket.emit('clientupdate', ['blockdamage', [[blockid, blocktype], damagelevel]])
 }
 
