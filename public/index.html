@@ -42,9 +42,9 @@
         )
 
         function handlebuttonpress(event) {
-                // namechosen = document.getElementById('namecontainer').value
-                // colorchosen = document.getElementById('colorcontainer').value
-                // passchosen = document.getElementById('passcontainer').value
+                namechosen = document.getElementById('namecontainer').value
+                colorchosen = document.getElementById('colorcontainer').value
+                passchosen = document.getElementById('passcontainer').value
                 
 
                 if (!isAlphanumeric(namechosen) || document.getElementById(`player-${namechosen}`)) {
@@ -59,14 +59,14 @@
                             if (callback.status == 'incorrect' ) {
                                 console.log('incorrect password')
                             } else {
-                                // handlesuccess(event)
+                                handlesuccess(event)
                             }
                         })
                         
                     }
-                namechosen = 'test'
-                colorchosen = 'purple'
-                passchosen = 'pass'
+                // namechosen = 'test'
+                // colorchosen = 'purple'
+                // passchosen = 'pass'
                 handlesuccess(event)
 
                         function handlesuccess(callback) {
@@ -133,6 +133,11 @@
                 let block = document.getElementById(info[0])
                 block.classList.remove(block.classList[1])
                 block.classList.add(info[1])
+            }
+            if (type == 'blockbroken') {
+                let block = info
+                console.log(block)
+                document.getElementById(block).remove();
             }
         })
         
@@ -258,6 +263,9 @@ function damageblock(block) {
 }
 
 function repairdamagedblocks(block) {
+
+    let blockid = block.id
+    let blocktype = block.classList[0]
     // Get the current damage level from the class list
     let damagelevel = parseInt(block.classList[1].split('e')[1]);
 
@@ -274,6 +282,8 @@ function repairdamagedblocks(block) {
 
     // Add the new damage class
     block.classList.add(`damage${damagelevel}`);
+
+    socket.emit('clientupdate', ['blockdamage', [[blockid, blocktype], damagelevel]])
 }
 
         function addplayer(name, color, position) {

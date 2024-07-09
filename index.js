@@ -106,7 +106,7 @@ io.on('connection', (socket) =>{
 
             let blockindex = findBlockIndex(blocktype, blockpos['x'], blockpos['y'])
             console.log(blockindex)
-            delete worldinfo[blocktype][blockindex]
+            worldinfo[blocktype].splice(blockindex, 1)
             updategame('blockbroken', info[0])
         }
     })
@@ -151,24 +151,21 @@ io.on('connection', (socket) =>{
 })
 
 function findBlockIndex(blockType, targetX, targetY) {
-    if (!worldinfo[blockType]) {
-        return -1; // Block type does not exist
-    }
-    
-    const blockArray = worldinfo[blockType];
-    i = 0
-    
-    for (let elem in blockArray) {
-        i++
-        if (elem['x'] == targetX) {
-            if (elem['y'] == targetY) {
-                
-            } else {
-                return -1
-            }
+
+    for (let elem in worldinfo[blockType]) {
+        let checkelem = worldinfo[blockType][elem]
+
+        if (checkelem['x'] != targetX) {
+            return 'no x'
         } else {
-            return -1
+            if (checkelem['y'] != targetY) {
+            return 'no y'
+            }
+            else {
+                return elem;
+            }
         }
+        
     }
 }
 
@@ -197,7 +194,12 @@ function updategame(updatetype, info, socket) {
         io.emit('gameupdate', ['pos', info])
     }
     if (updatetype == 'worldfull') {
-        io.emit('gameupdate', ['worldall', worldinfo])
+        if (socket) {
+            socket.emit('gameupdate', ['worldall', worldinfo])
+        } else {
+            io.emit('gameupdate', ['worldall', worldinfo])
+        }
+        
     }
     if (updatetype == 'world') {
         io.emit('gameupdate', ['worldupdate', info])
@@ -208,8 +210,7 @@ function updategame(updatetype, info, socket) {
         io.emit('gameupdate', ['blockdamage', [coords, damagelevel]])
     }
     if (updatetype == 'blockbroken') {
-        console.log(worldinfo)
-        io.emit('gmaeupdate', ['blockbroken', info])
+        io.emit('gameupdate', ['blockbroken', info])
     }
 }
 
