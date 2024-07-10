@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link href='https://fonts.googleapis.com/css?family=Varela Round' rel='stylesheet'>
@@ -11,6 +12,7 @@
     <script src="https://kit.fontawesome.com/ea3f46344d.js" crossorigin="anonymous"></script>
     <title>Multiplayer Game</title>
 </head>
+
 <body>
     <div id="gamecontainer"></div>
     <div id="windowcontainer"></div>
@@ -22,6 +24,7 @@
         var colorchosen
         var gamer
         var game
+        var inventory
 
         function isValidColor(color) {
             // Create a temporary DOM element
@@ -36,57 +39,85 @@
             makenewwindow('login', 'login');
             // You need to pass the callback to the handlebuttonpress function
             document.getElementById('submitname').addEventListener('click', () => handlebuttonpress(callback));
-        
-            }
-            
+
+        }
+
         )
 
         function handlebuttonpress(event) {
-                namechosen = document.getElementById('namecontainer').value
-                colorchosen = document.getElementById('colorcontainer').value
-                passchosen = document.getElementById('passcontainer').value
-                
+            namechosen = document.getElementById('namecontainer').value
+            colorchosen = document.getElementById('colorcontainer').value
+            passchosen = document.getElementById('passcontainer').value
 
-                if (!isAlphanumeric(namechosen) || document.getElementById(`player-${namechosen}`)) {
-                    console.log('empty username')
+
+            if (!isAlphanumeric(namechosen) || document.getElementById(`player-${namechosen}`)) {
+                console.log('empty username')
+            } else {
+                if (!isAlphanumeric(colorchosen) || !isValidColor(colorchosen)) {
+                    console.log('empty color')
                 } else {
-                    if (!isAlphanumeric(colorchosen) || !isValidColor(colorchosen)) {
-                        console.log('empty color')
-                    } else {
-                        let userandpass = [namechosen, passchosen]
-                        socket.emit('requestpass', userandpass, (callback) => {
-                            console.log(callback.status)
-                            if (callback.status == 'incorrect' ) {
-                                console.log('incorrect password')
-                            } else {
-                                handlesuccess(event)
-                            }
-                        })
-                        
-                    }
-                // namechosen = 'test'
-                // colorchosen = 'purple'
-                // passchosen = 'pass'
-                handlesuccess(event)
-
-                        function handlesuccess(callback) {
-                            callback({name: namechosen, color: colorchosen, pass: passchosen})
-
-                            gamer = `player-${namechosen}`
-
-                            document.getElementById('logincontainer').style.display = 'none'
-
-                            // Initialize movement system
-                            setTimeout(() => {
-                                setupMovementSystem();
-                                deletewindow('0')
-                            }, 50);
+                    let userandpass = [namechosen, passchosen]
+                    socket.emit('requestpass', userandpass, (callback) => {
+                        console.log(callback.status)
+                        if (callback.status == 'incorrect') {
+                            console.log('incorrect password')
+                        } else {
+                            handlesuccess(event)
                         }
-                        
-                        
-                    }
-                    
+                    })
+
                 }
+
+                function handlesuccess(callback) {
+                    callback({ name: namechosen, color: colorchosen, pass: passchosen })
+
+                    gamer = `player-${namechosen}`
+
+                    document.getElementById('logincontainer').style.display = 'none'
+
+                    // Initialize movement system
+                    setTimeout(() => {
+                        setupMovementSystem();
+                        document.getElementById('floatingwindow0').remove()
+                        setTimeout(() => {
+                            openinventory()
+                        }, 10);
+
+                    }, 50);
+                }
+
+
+            }
+
+        }
+
+        function openinventory() {
+            // Select all elements with 'floatingwindow' in their ID
+            let floatingWindowElements = document.querySelectorAll('[id*="floatingwindow"]');
+
+            // Loop through and remove each element
+            floatingWindowElements.forEach(function(element) {
+                element.remove();
+            });
+
+            setTimeout(() => {
+                makenewwindow('inventory', 'inventory')
+                for (let item in inventory) {
+                    console.log(inventory[item])
+                    let type = inventory[item][0]
+                    let amount = inventory[item][1]
+
+                    let invcontainer = document.getElementById('inventorycontainer')
+
+                    let element =  `<button class='inventory${type} ${amount}'>
+                                    ${type} | ${amount} 
+                                    </button>`
+
+                    invcontainer.innerHTML += element
+                }
+            }, 100);
+
+        }
 
         socket.on('gameupdate', (data) => {
             let type = data[0]
@@ -95,15 +126,19 @@
                 let name = info[0]
                 let color = info[1]
                 let position = info[2]
+                if (gamer == `player-${name}`) {
+                    inventory = info[3]
+                    console.log(inventory)
+                }
                 let elementname = document.getElementById(`player-${name}`)
                 if (!elementname) {
                     addplayer(name, color, position)
                     console.log(`player ${name} joined`)
-                    
+
                 }
             }
             if (type == 'all') {
-                document.getElementById('gamecontainer').innerHTML = `` 
+                document.getElementById('gamecontainer').innerHTML = ``
             }
             if (type == 'pos') {
                 let playername = info[0]
@@ -118,8 +153,8 @@
                     } else {
                         console.error(`Player element not found: ${playername}`);
                     }
-                } else {}
-                
+                } else { }
+
             }
             if (type == 'worldall') {
                 for (let elem in info) {
@@ -138,9 +173,11 @@
                 let block = info
                 console.log(block)
                 document.getElementById(block).remove();
+
+                inventory
             }
         })
-        
+
         function setupMovementSystem() {
             const game = document.getElementById(gamer);
 
@@ -166,16 +203,6 @@
                     };
 
                     socket.emit('clientupdate', ['position', currentPos]);
-
-                    // Start repeating the function every 100ms
-                    // movementFunctions[key].intervalId = setInterval(() => {
-                    //     movementFunctions[key].func();
-                    //     const currentPos = {
-                    //         x: game.style.getPropertyValue('grid-column-start'),
-                    //         y: game.style.getPropertyValue('grid-row-start')
-                    //     };
-                    //     socket.emit('clientupdate', ['position', currentPos]);
-                    // }, 100);
                 }
             }
 
@@ -198,100 +225,100 @@
             function moveForward() {
                 let checkblock = document.getElementById(`${game.style.gridColumn}:${game.style.gridRow - 1}`)
                 if (!checkblock) {
-                    game.style.gridRow --
+                    game.style.gridRow--
                 } else {
                     damageblock(checkblock)
                 }
-                
+
             }
 
             function moveLeft() {
-                let checkblock = document.getElementById(`${game.style.gridColumn- 1}:${game.style.gridRow}`)
+                let checkblock = document.getElementById(`${game.style.gridColumn - 1}:${game.style.gridRow}`)
                 if (!checkblock) {
-                    game.style.gridColumn --
+                    game.style.gridColumn--
                 } else {
                     damageblock(checkblock)
                 }
-                
+
             }
 
             function moveBackward() {
                 let checkblock = document.getElementById(`${game.style.gridColumn}:${Number(game.style.gridRow) + 1}`)
                 if (!checkblock) {
-                    game.style.gridRow ++
-                    if (game.style.gridRow > 30) {game.style.gridRow = 30}
+                    game.style.gridRow++
+                    if (game.style.gridRow > 30) { game.style.gridRow = 30 }
                 } else {
                     damageblock(checkblock)
                 }
-                
+
             }
 
             function moveRight() {
                 let checkblock = document.getElementById(`${Number(game.style.gridColumn) + 1}:${game.style.gridRow}`)
                 if (!checkblock) {
-                    game.style.gridColumn ++
-                    if (game.style.gridColumn > 30) {game.style.gridColumn = 30}
+                    game.style.gridColumn++
+                    if (game.style.gridColumn > 30) { game.style.gridColumn = 30 }
                 } else {
                     damageblock(checkblock)
                 }
-                
+
             }
-}
-     
-function damageblock(block) {
-    
-    let blockid = block.id
-    let blocktype = block.classList[0]
-    // Get the current damage level from the class list
-    let damagelevel = parseInt(block.classList[1].split('e')[1]);
+        }
 
-    // Increment the damage level
-    damagelevel++;
+        function damageblock(block) {
 
-    // Ensure the damage level does not exceed the maximum allowed value
-    if (damagelevel > 4) {
-        socket.emit('clientupdate', ['blockbroken', [blockid, blocktype, namechosen]])
-    }
+            let blockid = block.id
+            let blocktype = block.classList[0]
+            // Get the current damage level from the class list
+            let damagelevel = parseInt(block.classList[1].split('e')[1]);
 
-    // Remove the old damage class
-    block.classList.remove(`damage${damagelevel - 1}`);
-    
-    // Add the new damage class
-    block.classList.add(`damage${damagelevel}`);
-    
-    socket.emit('clientupdate', ['blockdamage', [[blockid, blocktype], damagelevel]])
-}
+            // Increment the damage level
+            damagelevel++;
 
-function repairdamagedblocks(block) {
+            // Ensure the damage level does not exceed the maximum allowed value
+            if (damagelevel > 4) {
+                socket.emit('clientupdate', ['blockbroken', [blockid, blocktype, namechosen]])
+            }
 
-    let blockid = block.id
-    let blocktype = block.classList[0]
-    // Get the current damage level from the class list
-    let damagelevel = parseInt(block.classList[1].split('e')[1]);
+            // Remove the old damage class
+            block.classList.remove(`damage${damagelevel - 1}`);
 
-    // Decrement the damage level
-    damagelevel--;
+            // Add the new damage class
+            block.classList.add(`damage${damagelevel}`);
 
-    // Ensure the damage level does not go below the minimum allowed value
-    if (damagelevel < 0) {
-        damagelevel = 0;
-    }
+            socket.emit('clientupdate', ['blockdamage', [[blockid, blocktype], damagelevel]])
+        }
 
-    // Remove the old damage class
-    block.classList.remove(`damage${damagelevel + 1}`);
+        function repairdamagedblocks(block) {
 
-    // Add the new damage class
-    block.classList.add(`damage${damagelevel}`);
+            let blockid = block.id
+            let blocktype = block.classList[0]
+            // Get the current damage level from the class list
+            let damagelevel = parseInt(block.classList[1].split('e')[1]);
 
-    socket.emit('clientupdate', ['blockdamage', [[blockid, blocktype], damagelevel]])
-}
+            // Decrement the damage level
+            damagelevel--;
+
+            // Ensure the damage level does not go below the minimum allowed value
+            if (damagelevel < 0) {
+                damagelevel = 0;
+            }
+
+            // Remove the old damage class
+            block.classList.remove(`damage${damagelevel + 1}`);
+
+            // Add the new damage class
+            block.classList.add(`damage${damagelevel}`);
+
+            socket.emit('clientupdate', ['blockdamage', [[blockid, blocktype], damagelevel]])
+        }
 
         function addplayer(name, color, position) {
             let player = `<div class="player" id='player-${name}'>
                             <div class="playercolor"></div>
                             <div id='playername-${name}' class="playername">${name}</div>
                         </div>`
-                        
+
             document.getElementById('gamecontainer').innerHTML += player
             let playeringame = document.getElementById(`player-${name}`)
             playeringame.style.backgroundColor = color
@@ -331,4 +358,5 @@ function repairdamagedblocks(block) {
         }
     </script>
 </body>
+
 </html>

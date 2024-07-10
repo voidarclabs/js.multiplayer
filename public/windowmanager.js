@@ -163,6 +163,8 @@ appcontentdict['login'] = `<div class="popup" id="logincontainer">
                             <button type="submit"id='submitname'>submit</button>
                         </div>`
 
+appcontentdict['inventory'] = `<div class='menu' id='inventorycontainer'></div>`
+
 
 function makenewwindow(content, appname) {
     let newwindow = `<div class="draggableDiv" id="floatingwindow${i}">
@@ -174,7 +176,6 @@ function makenewwindow(content, appname) {
                         </div>
                         <div class='appcontent' id='appcontent${i}'>${appcontentdict[content]}</div>
                         <div class="resizer bottom-right-resize" id="resizer${i}"></div>
-                        <div class="unmin" id="unmin${i}" onclick="minimisewindow('${i}')"><i id="unminicon${i}" class="fa-solid fa-minus unminicon"></div>
                     </div>`;
   document.getElementById('windowcontainer').innerHTML += newwindow;
 
@@ -191,6 +192,7 @@ function deletewindow(window) {
     deletedwindow.style.opacity = '0'
     setTimeout(() => {
           deletedwindow.remove()
-    }, 200);
+          console.log('e')
+    }, 100);
 
 }

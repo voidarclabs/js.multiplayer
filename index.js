@@ -4,13 +4,13 @@ const app = express();
 const path = require('path');
 const socketio = require('socket.io');
 const mysql = require("mysql2");
-const chalk=require("chalk"); 
+const chalk = require("chalk");
 const fs = require('fs');
 
 
 // declare constants
 const port = 3000
-const gamespawn = {x: 1, y: 1}
+const gamespawn = { x: 1, y: 1 }
 const starterinventory = []
 
 var userinfo
@@ -28,7 +28,7 @@ function init() {
 
 // make server serve index.html when requested
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // allow use of game dir
@@ -39,7 +39,7 @@ app.use(express.static('public'));
 
 // start server
 const server = app.listen(port, () => {
-  console.log(`Server listening on`, chalk.magenta(`${port}`));
+    console.log(`Server listening on`, chalk.magenta(`${port}`));
 });
 
 // declare websocket server
@@ -48,10 +48,10 @@ const io = socketio(server)
 init()
 
 // listen for incoming connections
-io.on('connection', (socket) =>{
+io.on('connection', (socket) => {
 
     console.log(chalk.cyan(`new connection`), chalk.yellow(`${socket.id}`))
-    
+
     updategame('allinfo', gameinfo, socket)
 
     socket.on('disconnect', () => {
@@ -63,7 +63,7 @@ io.on('connection', (socket) =>{
         updategame('allinfo', gameinfo, io)
     })
 
-    socket.on('clientupdate', (data)=> {
+    socket.on('clientupdate', (data) => {
         let type = data[0]
         let info = data[1]
         let client = playersocket[socket.id]
@@ -99,7 +99,7 @@ io.on('connection', (socket) =>{
         if (type == 'blockbroken') {
             let blocktype = info[1]
             let player = info[2]
-            
+
             let blockpos = {}
             blockpos['x'] = info[0].split(':')[0]
             blockpos['y'] = info[0].split(':')[1]
@@ -118,12 +118,12 @@ io.on('connection', (socket) =>{
         let pass = data[1]
         if (name in playerpass) {
             if (pass !== playerpass[name]) {
-                callback({status: 'incorrect'})
+                callback({ status: 'incorrect' })
             } else {
-                callback({status: 'correct'})
+                callback({ status: 'correct' })
             }
         } else {
-            callback({status: 'newplayer'})
+            callback({ status: 'newplayer' })
             playerpass[name] = pass
             console.log(pass)
             savepasswordtofile()
@@ -159,19 +159,19 @@ function findBlockIndex(blockType, targetX, targetY) {
             return 'no x'
         } else {
             if (checkelem['y'] != targetY) {
-            return 'no y'
+                return 'no y'
             }
             else {
                 return elem;
             }
         }
-        
+
     }
 }
 
 
 function updategame(updatetype, info, socket) {
-    
+
     if (updatetype == 'playerjoin') {
         let name = info[0]
         let color = info[1]
@@ -199,7 +199,7 @@ function updategame(updatetype, info, socket) {
         } else {
             io.emit('gameupdate', ['worldall', worldinfo])
         }
-        
+
     }
     if (updatetype == 'world') {
         io.emit('gameupdate', ['worldupdate', info])
