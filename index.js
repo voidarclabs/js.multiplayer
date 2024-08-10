@@ -9,7 +9,7 @@ const fs = require('fs');
 
 
 // declare constants
-const port = 3000
+const port = 4000
 const gamespawn = { x: 1, y: 1 }
 const starterinventory = []
 
@@ -67,6 +67,7 @@ io.on('connection', (socket) => {
         let type = data[0]
         let info = data[1]
         let client = playersocket[socket.id]
+
         if (type == 'position') {
             gameinfo[client][2] = info
             let newinfo = [info['x'], info['y']]
@@ -100,12 +101,13 @@ io.on('connection', (socket) => {
             let blocktype = info[1]
             let player = info[2]
 
+            addtoinventory(player, blocktype, 1, socket)
+
             let blockpos = {}
             blockpos['x'] = info[0].split(':')[0]
             blockpos['y'] = info[0].split(':')[1]
 
             let blockindex = findBlockIndex(blocktype, blockpos['x'], blockpos['y'])
-            console.log(blockindex)
             worldinfo[blocktype].splice(blockindex, 1)
             updategame('blockbroken', info[0])
         }
@@ -149,6 +151,25 @@ io.on('connection', (socket) => {
         }
     })
 })
+
+function addtoinventory(player, block, amount, socket) {
+    let currentinventory = userinfo[player][3]
+
+    let wrong = 0
+    
+    currentinventory.forEach(element => {
+        if (element[0] == block) {
+            element[1] += amount
+            updategame('playerinventory', currentinventory, socket)
+        } else {
+            wrong++
+            if (wrong == currentinventory.length) {
+                currentinventory.push([block, amount])
+                console.log(currentinventory)
+            }
+        }
+    });
+}
 
 function findBlockIndex(blockType, targetX, targetY) {
 
@@ -212,7 +233,19 @@ function updategame(updatetype, info, socket) {
     if (updatetype == 'blockbroken') {
         io.emit('gameupdate', ['blockbroken', info])
     }
+    if (updatetype == 'playerinventory') {
+        let playername = playersocket[socket.id]
+        let inventory = info
+        
+        console.log(playername)
+        userinfo[playername][3] = inventory
+
+        console.log(playersocket)
+
+        socket.emit('gameupdate', ['inventoryupdate', userinfo[playername][3]])
+    }
 }
+
 
 function savegame(player) {
     userinfo[player] = gameinfo[player]

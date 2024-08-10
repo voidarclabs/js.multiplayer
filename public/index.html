@@ -102,19 +102,7 @@
 
             setTimeout(() => {
                 makenewwindow('inventory', 'inventory')
-                for (let item in inventory) {
-                    console.log(inventory[item])
-                    let type = inventory[item][0]
-                    let amount = inventory[item][1]
-
-                    let invcontainer = document.getElementById('inventorycontainer')
-
-                    let element =  `<button class='inventory${type} ${amount}'>
-                                    ${type} | ${amount} 
-                                    </button>`
-
-                    invcontainer.innerHTML += element
-                }
+                addtoinventory(inventory)                
             }, 100);
 
         }
@@ -173,10 +161,30 @@
                 let block = info
                 console.log(block)
                 document.getElementById(block).remove();
-
-                inventory
+            }
+            if (type == 'inventoryupdate') {
+                addtoinventory(info)
+                console.log(info)
             }
         })
+
+        function addtoinventory(inventory) {
+            let invcontainer = document.getElementById('inventorycontainer')
+
+            invcontainer.innerHTML = ""
+
+            for (let item in inventory) {
+                    console.log(inventory[item])
+                    let type = inventory[item][0]
+                    let amount = inventory[item][1]
+
+                    let element =  `<button class='inventory${type} ${amount}'>
+                                    ${type} | ${amount} 
+                                    </button>`
+
+                    invcontainer.innerHTML += element
+                }
+        }
 
         function setupMovementSystem() {
             const game = document.getElementById(gamer);
