@@ -77,6 +77,12 @@ io.on('connection', (socket) => {
         if (type == 'savegame') {
             savegame(playersocket[socket.id])
         }
+        if (type == 'damagedblock') {
+            addtoinventory(client, info, 1, socket)
+        }
+        if (type == 'repairedblock') {
+            addtoinventory(client, info, -1, socket)
+        }
         if (type == 'blockdamage') {
             let blockmeta = info[0]
             let blocktype = blockmeta[1]
@@ -110,6 +116,20 @@ io.on('connection', (socket) => {
             let blockindex = findBlockIndex(blocktype, blockpos['x'], blockpos['y'])
             worldinfo[blocktype].splice(blockindex, 1)
             updategame('blockbroken', info[0])
+        }
+        if (type == 'placeblock') {
+            let type = info[0]
+            let position = info[1]
+
+            let blockmeta = {}
+            blockmeta['x'] = position.split(':')[0]
+            blockmeta['y'] = position.split(':')[1]
+            blockmeta['d'] = 4
+
+            worldinfo[type].push(blockmeta)
+            updategame('worldfull', undefined)
+
+            addtoinventory(playersocket[socket.id], type, -2, socket)
         }
     })
 
@@ -165,7 +185,6 @@ function addtoinventory(player, block, amount, socket) {
             wrong++
             if (wrong == currentinventory.length) {
                 currentinventory.push([block, amount])
-                console.log(currentinventory)
             }
         }
     });
@@ -237,10 +256,7 @@ function updategame(updatetype, info, socket) {
         let playername = playersocket[socket.id]
         let inventory = info
         
-        console.log(playername)
         userinfo[playername][3] = inventory
-
-        console.log(playersocket)
 
         socket.emit('gameupdate', ['inventoryupdate', userinfo[playername][3]])
     }

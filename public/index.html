@@ -25,6 +25,8 @@
         var gamer
         var game
         var inventory
+        var invref
+        var selectedblock = null
 
         function isValidColor(color) {
             // Create a temporary DOM element
@@ -78,6 +80,7 @@
                     // Initialize movement system
                     setTimeout(() => {
                         setupMovementSystem();
+                        setupplacingsystem()
                         document.getElementById('floatingwindow0').remove()
                         setTimeout(() => {
                             openinventory()
@@ -162,23 +165,44 @@
                 console.log(block)
                 document.getElementById(block).remove();
             }
+            if (type == 'blockplaced') {
+                let pos = info[0]
+                let blocktype = info[1]
+                let damage = info[2]
+            }
             if (type == 'inventoryupdate') {
                 addtoinventory(info)
                 console.log(info)
             }
         })
 
+        function selectblock(block) {
+            console.log('balls')
+            let inventoryItems = document.querySelectorAll('.inventory');
+
+            inventoryItems.forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            document.getElementById(`inventory${block}`).classList.add('selected')
+
+            selectedblock = block
+        }
+
         function addtoinventory(inventory) {
             let invcontainer = document.getElementById('inventorycontainer')
 
             invcontainer.innerHTML = ""
+            invref = {}
 
             for (let item in inventory) {
                     console.log(inventory[item])
                     let type = inventory[item][0]
                     let amount = inventory[item][1]
 
-                    let element =  `<button class='inventory${type} ${amount}'>
+                    invref[type] = amount
+
+                    let element =  `<button onclick="selectblock('${type}')" id="inventory${type}" class='inventory ${amount}'>
                                     ${type} | ${amount} 
                                     </button>`
 
@@ -272,6 +296,69 @@
 
             }
         }
+        
+        function setupplacingsystem() {
+            const game = document.getElementById(gamer);
+
+            let placingFunctions = {
+                i: { func: placeup, intervalId: null },
+                j: { func: placeleft, intervalId: null },
+                k: { func: placedown, intervalId: null },
+                l: { func: placeright, intervalId: null }
+            };
+
+            function keydownHandler(event) {
+                const key = event.key.toLowerCase();
+                if (placingFunctions[key]) {
+                    placingFunctions[key].func();
+
+                    //send to server
+                }
+            }
+
+            document.addEventListener('keydown', keydownHandler);
+
+            function placeup() {
+                let checkblock = document.getElementById(`${game.style.gridColumn}:${game.style.gridRow - 1}`)
+                placeblock(checkblock, `${game.style.gridColumn}:${game.style.gridRow - 1}`)
+            }
+
+            function placedown() {
+                let checkblock = document.getElementById(`${game.style.gridColumn}:${Number(game.style.gridRow) + 1}`)
+                placeblock(checkblock, `${game.style.gridColumn}:${Number(game.style.gridRow) + 1}`)
+            }
+
+            function placeleft() {
+                let checkblock = document.getElementById(`${game.style.gridColumn - 1}:${game.style.gridRow}`)
+                placeblock(checkblock, `${game.style.gridColumn - 1}:${game.style.gridRow}`)
+            }
+
+            function placeright() {
+                let checkblock = document.getElementById(`${Number(game.style.gridColumn) + 1}:${game.style.gridRow}`)
+                placeblock(checkblock, `${Number(game.style.gridColumn) + 1}:${game.style.gridRow}`)
+            }
+
+            function placeblock(checkblock, pos) {
+                if (!checkblock) {
+                    if (selectedblock) {
+                        if (invref[selectedblock] > 0) {
+                            console.log('block placed')
+                            socket.emit('clientupdate', ['placeblock', [selectedblock, pos]])
+                        } else {
+                            console.log('too few resources')
+                        }
+                    } else {
+                        console.log("no block to place")
+                    }
+                } else {
+                    let existingblock = checkblock
+                    if (invref[selectedblock] > 0) {
+                        repairdamagedblocks(existingblock)
+                    } console.log("too few resources")
+                    
+                }
+            }
+        }
 
         function damageblock(block) {
 
@@ -295,6 +382,7 @@
             block.classList.add(`damage${damagelevel}`);
 
             socket.emit('clientupdate', ['blockdamage', [[blockid, blocktype], damagelevel]])
+            socket.emit('clientupdate', ['damagedblock', blocktype])
         }
 
         function repairdamagedblocks(block) {
@@ -310,15 +398,18 @@
             // Ensure the damage level does not go below the minimum allowed value
             if (damagelevel < 0) {
                 damagelevel = 0;
+            } else {
+                socket.emit('clientupdate', ['repairedblock', blocktype])
+                // Remove the old damage class
+                block.classList.remove(`damage${damagelevel + 1}`);
+
+                // Add the new damage class
+                block.classList.add(`damage${damagelevel}`);
+
+                socket.emit('clientupdate', ['blockdamage', [[blockid, blocktype], damagelevel]])
             }
 
-            // Remove the old damage class
-            block.classList.remove(`damage${damagelevel + 1}`);
-
-            // Add the new damage class
-            block.classList.add(`damage${damagelevel}`);
-
-            socket.emit('clientupdate', ['blockdamage', [[blockid, blocktype], damagelevel]])
+            
         }
 
         function addplayer(name, color, position) {

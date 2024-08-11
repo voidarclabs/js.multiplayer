@@ -50,7 +50,7 @@ body {
 }
 
 .damage1 {
-    filter: brightness(1);
+    filter: brightness(0.9);
 }
 
 .damage2 {
